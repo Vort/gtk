@@ -211,6 +211,7 @@ gtk_public_h_sources = 		\
 	gtkicontheme.h		\
 	gtkiconview.h		\
 	gtkimage.h		\
+	gtkimageview.h \
 	gtkimcontext.h		\
 	gtkimcontextinfo.h	\
 	gtkimcontextsimple.h	\
@@ -774,6 +775,7 @@ gtk_base_c_sources = 		\
 	gtkiconview.c		\
 	gtkimage.c		\
 	gtkimagedefinition.c	\
+	gtkimageview.c \
 	gtkimcontext.c		\
 	gtkimcontextsimple.c	\
 	gtkimmodule.c		\

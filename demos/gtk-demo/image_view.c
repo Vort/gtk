@@ -27,7 +27,7 @@ file_set_cb (GtkFileChooserButton *widget,
   GFile *file = g_file_new_for_path (filename);
   gtk_image_view_load_from_file_async (GTK_IMAGE_VIEW (image_view),
                                        file,
-                                       2,
+                                       1,
                                        NULL,
                                        generic_cb,
                                        NULL);

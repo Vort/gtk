@@ -176,10 +176,6 @@ struct _LoadTaskData
 };
 
 
-static void gtk_image_view_update_surface (GtkImageView    *image_view,
-                                           const GdkPixbuf *frame,
-                                           int              scale_factor);
-
 static void adjustment_value_changed_cb (GtkAdjustment *adjustment,
                                          gpointer       user_data);
 
@@ -2114,10 +2110,13 @@ gtk_image_view_replace_image (GtkImageView     *image_view,
   if (priv->image)
     g_object_unref (priv->image);
 
+  /* TODO: How to do that? */
   /*if (scale_factor == 0)*/
     /*priv->scale_factor = gtk_widget_get_scale_factor (GTK_WIDGET (image_view));*/
   /*else*/
     /*priv->scale_factor = scale_factor;*/
+
+  /* TODO: Set size_valid depending on the size changing... */
 
   priv->image = image;
   priv->size_valid = FALSE;
@@ -2127,57 +2126,36 @@ gtk_image_view_replace_image (GtkImageView     *image_view,
 }
 
 static void
-gtk_image_view_update_surface (GtkImageView    *image_view,
-                               const GdkPixbuf *frame,
-                               int              scale_factor)
-{
-  GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
-  GdkWindow *window = gtk_widget_get_window (GTK_WIDGET (image_view));
-  gboolean size_changed = TRUE;
-
-  /*new_surface = gdk_cairo_surface_create_from_pixbuf (frame,*/
-                                                      /*scale_factor,*/
-                                                      /*window);*/
-
-  /*if (priv->image_surface)*/
-    /*{*/
-      /*size_changed = (cairo_image_surface_get_width (priv->image_surface) !=*/
-                      /*cairo_image_surface_get_width (new_surface)) ||*/
-                     /*(cairo_image_surface_get_height (priv->image_surface) !=*/
-                      /*cairo_image_surface_get_height (new_surface)) ||*/
-                     /*(scale_factor != priv->scale_factor);*/
-    /*}*/
-
-  /*gtk_image_view_replace_image (image_view,*/
-                                  /*new_surface,*/
-                                  /*scale_factor);*/
-
-  if (priv->fit_allocation || !size_changed)
-    gtk_widget_queue_draw (GTK_WIDGET (image_view));
-  else
-    gtk_widget_queue_resize (GTK_WIDGET (image_view));
-
-  /*g_assert (priv->image_surface != NULL);*/
-}
-
-static void
 gtk_image_view_load_image_from_stream (GtkImageView *image_view,
                                        GInputStream *input_stream,
                                        int           scale_factor,
                                        GCancellable *cancellable,
                                        GError       *error)
 {
-  /*GdkPixbufAnimation *result;*/
+  GdkPixbufAnimation *result;
 
   g_assert (error == NULL);
-  /*result = gdk_pixbuf_animation_new_from_stream (input_stream,*/
-                                                 /*cancellable,*/
-                                                 /*&error);*/
+  result = gdk_pixbuf_animation_new_from_stream (input_stream,
+                                                 cancellable,
+                                                 &error);
 
   if (!error)
     {
-      g_error ("");
-    /*gtk_image_view_replace_animation (image_view, result, scale_factor);*/
+      GtkAbstractImage *image;
+
+      if (gdk_pixbuf_animation_is_static_image (result))
+        {
+          GdkPixbuf *frame = gdk_pixbuf_animation_get_static_image (result);
+
+          image = GTK_ABSTRACT_IMAGE (gtk_pixbuf_image_new (frame, scale_factor));
+          g_object_unref (result);
+        }
+      else
+        {
+          image = GTK_ABSTRACT_IMAGE (gtk_pixbuf_animation_image_new (result, scale_factor));
+        }
+
+      gtk_image_view_set_abstract_image (image_view, image);
     }
 
   g_object_unref (input_stream);
@@ -2385,8 +2363,6 @@ gtk_image_view_set_pixbuf (GtkImageView    *image_view,
   g_return_if_fail (GTK_IS_IMAGE_VIEW (image_view));
   g_return_if_fail (GDK_IS_PIXBUF (pixbuf));
   g_return_if_fail (scale_factor >= 0);
-
-  gtk_image_view_update_surface (image_view, pixbuf, scale_factor);
 
   image = gtk_pixbuf_image_new (pixbuf, scale_factor);
 

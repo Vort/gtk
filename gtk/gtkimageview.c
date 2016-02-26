@@ -264,8 +264,15 @@ gtk_image_view_transitions_enabled (GtkImageView *image_view)
                 "gtk-enable-animations", &animations_enabled,
                 NULL);
 
-  /*return priv->transitions_enabled && animations_enabled && priv->image_surface;*/
   return priv->transitions_enabled && animations_enabled && priv->image;
+}
+
+void
+image_changed_cb (GtkAbstractImage *image, gpointer user_data)
+{
+  GtkImageView *image_view = user_data;
+
+  gtk_widget_queue_draw (GTK_WIDGET (image_view));
 }
 
 static gboolean
@@ -2107,21 +2114,35 @@ gtk_image_view_replace_image (GtkImageView     *image_view,
   GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
 
   if (priv->image)
-    g_object_unref (priv->image);
+    {
+      g_signal_handlers_disconnect_by_func (priv->image, image_changed_cb, image_view);
+      g_object_unref (priv->image);
+    }
 
-  /* TODO: How to do that? */
-  /*if (scale_factor == 0)*/
-    /*priv->scale_factor = gtk_widget_get_scale_factor (GTK_WIDGET (image_view));*/
-  /*else*/
-    /*priv->scale_factor = scale_factor;*/
+  /* TODO: Handle scale-factor 0 */
 
-  /* TODO: Set size_valid depending on the size changing... */
+  if (!image ^ !priv->image ||
+      (gtk_abstract_image_get_width (image)  != gtk_abstract_image_get_width (priv->image) ||
+       gtk_abstract_image_get_height (image) != gtk_abstract_image_get_height (priv->image) ||
+       gtk_abstract_image_get_scale_factor (image) != gtk_abstract_image_get_scale_factor (priv->image)))
+    {
+      priv->size_valid = FALSE;
+    }
 
   priv->image = image;
-  priv->size_valid = FALSE;
 
   if (priv->image)
-    g_object_ref (priv->image);
+    {
+      g_object_ref (priv->image);
+      g_signal_connect (priv->image, "changed", G_CALLBACK (image_changed_cb), image_view);
+    }
+
+  gtk_image_view_update_adjustments (image_view);
+
+  if (priv->fit_allocation)
+    gtk_widget_queue_draw (GTK_WIDGET (image_view));
+  else
+    gtk_widget_queue_resize (GTK_WIDGET (image_view));
 }
 
 static void
@@ -2151,6 +2172,7 @@ gtk_image_view_load_image_from_stream (GtkImageView *image_view,
         }
       else
         {
+          /* Takes ownership of @result */
           image = GTK_ABSTRACT_IMAGE (gtk_pixbuf_animation_image_new (result, scale_factor));
         }
 
@@ -2357,7 +2379,6 @@ gtk_image_view_set_pixbuf (GtkImageView    *image_view,
                            int              scale_factor)
 {
   GtkPixbufImage *image;
-  /*GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);*/
 
   g_return_if_fail (GTK_IS_IMAGE_VIEW (image_view));
   g_return_if_fail (GDK_IS_PIXBUF (pixbuf));
@@ -2383,32 +2404,13 @@ void
 gtk_image_view_set_surface (GtkImageView    *image_view,
                             cairo_surface_t *surface)
 {
-  GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
   GtkSurfaceImage *image;
-  double scale_x = 0.0;
-  double scale_y;
 
   g_return_if_fail (GTK_IS_IMAGE_VIEW (image_view));
-
-  if (surface)
-    {
-      g_return_if_fail (cairo_surface_get_type (surface) == CAIRO_SURFACE_TYPE_IMAGE);
-
-      cairo_surface_get_device_scale (surface, &scale_x, &scale_y);
-
-      g_return_if_fail (scale_x == scale_y);
-    }
 
   image = gtk_surface_image_new (surface);
 
   gtk_image_view_replace_image (image_view, GTK_ABSTRACT_IMAGE (image));
-
-  gtk_image_view_update_adjustments (image_view);
-
-  if (priv->fit_allocation)
-    gtk_widget_queue_draw (GTK_WIDGET (image_view));
-  else
-    gtk_widget_queue_resize (GTK_WIDGET (image_view));
 }
 
 /**
@@ -2439,26 +2441,11 @@ gtk_image_view_set_animation (GtkImageView       *image_view,
 }
 
 void
-image_changed_cb (GtkAbstractImage *image, gpointer user_data)
-{
-  GtkImageView *image_view = user_data;
-
-  gtk_widget_queue_draw (GTK_WIDGET (image_view));
-}
-
-void
 gtk_image_view_set_abstract_image (GtkImageView     *image_view,
                                    GtkAbstractImage *abstract_image)
 {
-  GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
-
   g_return_if_fail (GTK_IS_IMAGE_VIEW (image_view));
   g_return_if_fail (GTK_IS_ABSTRACT_IMAGE (abstract_image));
 
-  priv->image = abstract_image;
-
-  g_signal_connect (G_OBJECT (priv->image),
-                    "changed", G_CALLBACK (image_changed_cb), image_view);
-
-  gtk_widget_queue_resize (GTK_WIDGET (image_view));
+  gtk_image_view_replace_image (image_view, abstract_image);
 }

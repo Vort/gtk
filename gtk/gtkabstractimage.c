@@ -174,8 +174,7 @@ gtk_pixbuf_animation_image_get_height (GtkAbstractImage *image)
 static int
 gtk_pixbuf_animation_image_get_scale_factor (GtkAbstractImage *image)
 {
-  /*return GTK_PIXBUF_ANIMATION_IMAGE (image)->scale_factor;*/
-  return 1;
+  return GTK_PIXBUF_ANIMATION_IMAGE (image)->scale_factor;
 }
 
 static gboolean

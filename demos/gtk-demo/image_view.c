@@ -154,7 +154,13 @@ scale_scale_format_value_cb (GtkScale *scale,
 void
 load_pixbuf_button_clicked_cb ()
 {
-  GtkPixbufImage *image = gtk_pixbuf_image_new ("/usr/share/backgrounds/gnome/Fabric.jpg", 1);
+  GdkPixbuf *pixbuf;
+  GtkPixbufImage *image;
+
+  pixbuf = gdk_pixbuf_new_from_file ("/usr/share/backgrounds/gnome/Fabric.jpg", NULL);
+  image = gtk_pixbuf_image_new (pixbuf, 1);
+
+  g_object_unref (pixbuf);
 
   gtk_image_view_set_abstract_image (GTK_IMAGE_VIEW (image_view),
                                      GTK_ABSTRACT_IMAGE (image));
@@ -171,8 +177,6 @@ load_hidpi_pixbuf_button_clicked_cb ()
 
   animation = gdk_pixbuf_animation_new_from_file ("/home/baedert/0mKXcg1.gif", NULL);
   image = gtk_pixbuf_animation_image_new (animation, 1);
-
-  g_message ("%s", g_type_name (G_TYPE_FROM_INSTANCE (image)));
 
   gtk_image_view_set_abstract_image (GTK_IMAGE_VIEW (image_view), GTK_ABSTRACT_IMAGE (image));
 }

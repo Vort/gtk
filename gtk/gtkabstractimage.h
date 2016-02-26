@@ -80,7 +80,7 @@ typedef struct _GtkPixbufImageClass GtkPixbufImageClass;
 struct _GtkPixbufImage
 {
   GtkAbstractImage parent;
-  GdkPixbuf *pixbuf;
+  cairo_surface_t *surface;
   int scale_factor;
 };
 
@@ -93,7 +93,7 @@ GDK_AVAILABLE_IN_3_20
 GType gtk_pixbuf_image_get_type (void) G_GNUC_CONST;
 
 GDK_AVAILABLE_IN_3_20
-GtkPixbufImage *gtk_pixbuf_image_new (const char *path, int scale_factor);
+GtkPixbufImage *gtk_pixbuf_image_new (const GdkPixbuf *pixbuf, int scale_factor);
 
 
 /* ------------------------------------------------------------------------------------ */

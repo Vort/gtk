@@ -88,11 +88,11 @@ G_DEFINE_TYPE (GtkPixbufImage, gtk_pixbuf_image, GTK_TYPE_ABSTRACT_IMAGE)
 
 
 GtkPixbufImage *
-gtk_pixbuf_image_new (const char *path, int scale_factor)
+gtk_pixbuf_image_new (const GdkPixbuf *pixbuf, int scale_factor)
 {
   GtkPixbufImage *image = g_object_new (GTK_TYPE_PIXBUF_IMAGE, NULL);
   image->scale_factor = scale_factor;
-  image->pixbuf = gdk_pixbuf_new_from_file (path, NULL);
+  image->surface = gdk_cairo_surface_create_from_pixbuf (pixbuf, 1, NULL);
 
   return image;
 }
@@ -100,13 +100,13 @@ gtk_pixbuf_image_new (const char *path, int scale_factor)
 static int
 gtk_pixbuf_image_get_width (GtkAbstractImage *image)
 {
-  return gdk_pixbuf_get_width (GTK_PIXBUF_IMAGE (image)->pixbuf);
+  return cairo_image_surface_get_width (GTK_PIXBUF_IMAGE (image)->surface);
 }
 
 static int
 gtk_pixbuf_image_get_height (GtkAbstractImage *image)
 {
-  return gdk_pixbuf_get_height (GTK_PIXBUF_IMAGE (image)->pixbuf);
+  return cairo_image_surface_get_height (GTK_PIXBUF_IMAGE (image)->surface);
 }
 
 static int
@@ -118,10 +118,7 @@ gtk_pixbuf_image_get_scale_factor (GtkAbstractImage *image)
 static void
 gtk_pixbuf_image_draw (GtkAbstractImage *image, cairo_t *ct)
 {
-  cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf (
-      GTK_PIXBUF_IMAGE (image)->pixbuf, 1, NULL);
-
-  cairo_set_source_surface (ct, surface, 0, 0);
+  cairo_set_source_surface (ct, GTK_PIXBUF_IMAGE (image)->surface, 0, 0);
 }
 
 
@@ -156,14 +153,9 @@ gtk_pixbuf_animation_image_new (GdkPixbufAnimation *animation, int scale_factor)
   image->iter = gdk_pixbuf_animation_get_iter (animation, NULL);
   /* TODO: Use the delay for the CURRENT iter... */
   image->delay_ms = gdk_pixbuf_animation_iter_get_delay_time (image->iter);
-  g_assert (image->iter);
-  g_assert (gdk_pixbuf_animation_iter_get_pixbuf (image->iter));
   image->frame = gdk_cairo_surface_create_from_pixbuf (gdk_pixbuf_animation_iter_get_pixbuf (image->iter),
                                                        scale_factor, NULL);
 
-  g_assert (image->frame);
-
-  g_message ("CTOR");
   return image;
 }
 

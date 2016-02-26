@@ -50,6 +50,8 @@ struct _GtkAbstractImageClass
   int    (*get_height) (GtkAbstractImage *image);
   int    (*get_scale_factor) (GtkAbstractImage *image);
   void   (*draw) (GtkAbstractImage *image, cairo_t *ct);
+
+  void   (*changed) (GtkAbstractImage image);
 };
 
 GDK_AVAILABLE_IN_3_20
@@ -61,6 +63,9 @@ int gtk_abstract_image_get_height (GtkAbstractImage *image);
 
 void gtk_abstract_image_draw (GtkAbstractImage *image, cairo_t *ct);
 
+int gtk_abstract_image_get_scale_factor (GtkAbstractImage *image);
+
+/* ------------------------------------------------------------------------------------ */
 
 typedef struct _GtkPixbufImage GtkPixbufImage;
 typedef struct _GtkPixbufImageClass GtkPixbufImageClass;
@@ -68,8 +73,8 @@ typedef struct _GtkPixbufImageClass GtkPixbufImageClass;
 #define GTK_TYPE_PIXBUF_IMAGE           (gtk_pixbuf_image_get_type ())
 #define GTK_PIXBUF_IMAGE(obj)           (G_TYPE_CHECK_INSTANCE_CAST (obj, GTK_TYPE_PIXBUF_IMAGE, GtkPixbufImage))
 #define GTK_PIXBUF_IMAGE_CLASS(cls)     (G_TYPE_CHECK_CLASS_CAST (cls, GTK_TYPE_PIXBUF_IMAGE, GtkPixbufImageClass))
-#define GTK_IS_pixbuf_image(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_PIXBUF_IMAGE))
-#define GTK_IS_pixbuf_image_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_PIXBUF_IMAGE))
+#define GTK_IS_PIXBUF_IMAGE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_PIXBUF_IMAGE))
+#define GTK_IS_PIXBUF_IMAGE_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_PIXBUF_IMAGE))
 #define GTK_PIXBUF_IMAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_PIXBUF_IMAGE, GtkPixbufImageClass))
 
 struct _GtkPixbufImage
@@ -85,9 +90,77 @@ struct _GtkPixbufImageClass
 };
 
 GDK_AVAILABLE_IN_3_20
+GType gtk_pixbuf_image_get_type (void) G_GNUC_CONST;
+
+GDK_AVAILABLE_IN_3_20
 GtkPixbufImage *gtk_pixbuf_image_new (const char *path, int scale_factor);
 
 
+/* ------------------------------------------------------------------------------------ */
+
+
+typedef struct _GtkPixbufAnimationImage GtkPixbufAnimationImage;
+typedef struct _GtkPixbufAnimationImageClass GtkPixbufAnimationImageClass;
+
+#define GTK_TYPE_PIXBUF_ANIMATION_IMAGE           (gtk_pixbuf_animation_image_get_type ())
+#define GTK_PIXBUF_ANIMATION_IMAGE(obj)           (G_TYPE_CHECK_INSTANCE_CAST (obj, GTK_TYPE_PIXBUF_ANIMATION_IMAGE, GtkPixbufAnimationImage))
+#define GTK_PIXBUF_ANIMATION_IMAGE_CLASS(cls)     (G_TYPE_CHECK_CLASS_CAST (cls, GTK_TYPE_PIXBUF_ANIMATION_IMAGE, GtkPixbufAnimationImageClass))
+#define GTK_IS_PIXBUX_ANIMATION_IMAGE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_PIXBUF_ANIMATION_IMAGE))
+#define GTK_IS_PIXBUX_ANIMATION_IMAGE_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_PIXBUF_ANIMATION_IMAGE))
+#define GTK_PIXBUF_ANIMATION_IMAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_PIXBUF_ANIMATION_IMAGE, GtkPixbufAnimationImageClass))
+
+struct _GtkPixbufAnimationImage
+{
+  GtkAbstractImage parent;
+  GdkPixbufAnimation *animation;
+  GdkPixbufAnimationIter *iter;
+  cairo_surface_t *frame;
+  int scale_factor;
+  int delay_ms;
+  guint timeout_id;
+};
+
+struct _GtkPixbufAnimationImageClass
+{
+  GtkAbstractImageClass parent_class;
+};
+
+GDK_AVAILABLE_IN_3_20
+GType gtk_pixbuf_animation_image_get_type (void) G_GNUC_CONST;
+
+GDK_AVAILABLE_IN_3_20
+GtkPixbufAnimationImage *gtk_pixbuf_animation_image_new (GdkPixbufAnimation *animation,
+                                                         int scale_factor);
+
+
+/* ------------------------------------------------------------------------------------ */
+
+typedef struct _GtkSurfaceImage GtkSurfaceImage;
+typedef struct _GtkSurfaceImageClass GtkSurfaceImageClass;
+
+
+#define GTK_TYPE_SURFACE_IMAGE           (gtk_surface_image_get_type ())
+#define GTK_SURFACE_IMAGE(obj)           (G_TYPE_CHECK_INSTANCE_CAST (obj, GTK_TYPE_SURFACE_IMAGE, GtkSurfaceImage))
+#define GTK_SURFACE_IMAGE_CLASS(cls)     (G_TYPE_CHECK_CLASS_CAST (cls, GTK_TYPE_SURFACE_IMAGE, GtkSurfaceImageClass))
+#define GTK_IS_SURFACE_IMAGE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_SURFACE_IMAGE))
+#define GTK_IS_SURFACE_IMAGE_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_SURFACE_IMAGE))
+#define GTK_SURFACE_IMAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_SURFACE_IMAGE, GtkSurfaceImageClass))
+
+struct _GtkSurfaceImage
+{
+  GtkAbstractImage parent;
+  cairo_surface_t *surface;
+};
+
+struct _GtkSurfaceImageClass
+{
+  GtkAbstractImageClass parent_class;
+};
+
+GDK_AVAILABLE_IN_3_20
+GType gtk_surface_image_get_type (void) G_GNUC_CONST;
+
+GtkSurfaceImage *gtk_surface_image_new (cairo_surface_t *surface);
 
 G_END_DECLS
 

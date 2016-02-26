@@ -633,6 +633,10 @@ gtk_application_window_real_size_allocate (GtkWidget     *widget,
 {
   GtkApplicationWindow *window = GTK_APPLICATION_WINDOW (widget);
 
+
+  GTK_WIDGET_CLASS (gtk_application_window_parent_class)
+    ->size_allocate (widget, allocation);
+
   if (window->priv->menubar != NULL)
     {
       GtkAllocation menubar_allocation;
@@ -640,7 +644,7 @@ gtk_application_window_real_size_allocate (GtkWidget     *widget,
       gint menubar_height;
       GtkWidget *child;
 
-      _gtk_window_set_allocation (GTK_WINDOW (widget), allocation, &child_allocation);
+      /*_gtk_window_set_allocation (GTK_WINDOW (widget), allocation, &child_allocation);*/
       menubar_allocation = child_allocation;
 
       gtk_widget_get_preferred_height_for_width (window->priv->menubar,
@@ -656,9 +660,9 @@ gtk_application_window_real_size_allocate (GtkWidget     *widget,
       if (child != NULL && gtk_widget_get_visible (child))
         gtk_widget_size_allocate (child, &child_allocation);
     }
-  else
-    GTK_WIDGET_CLASS (gtk_application_window_parent_class)
-      ->size_allocate (widget, allocation);
+  /*else*/
+    /*GTK_WIDGET_CLASS (gtk_application_window_parent_class)*/
+      /*->size_allocate (widget, allocation);*/
 }
 
 static void
@@ -840,7 +844,7 @@ gtk_application_window_class_init (GtkApplicationWindowClass *class)
   widget_class->get_preferred_height_for_width = gtk_application_window_real_get_preferred_height_for_width;
   widget_class->get_preferred_width = gtk_application_window_real_get_preferred_width;
   widget_class->get_preferred_width_for_height = gtk_application_window_real_get_preferred_width_for_height;
-  widget_class->size_allocate = gtk_application_window_real_size_allocate;
+  /*widget_class->size_allocate = gtk_application_window_real_size_allocate;*/
   widget_class->realize = gtk_application_window_real_realize;
   widget_class->unrealize = gtk_application_window_real_unrealize;
   widget_class->map = gtk_application_window_real_map;

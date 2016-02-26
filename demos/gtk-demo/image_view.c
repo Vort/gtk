@@ -154,38 +154,27 @@ scale_scale_format_value_cb (GtkScale *scale,
 void
 load_pixbuf_button_clicked_cb ()
 {
-
-
   GtkPixbufImage *image = gtk_pixbuf_image_new ("/usr/share/backgrounds/gnome/Fabric.jpg", 1);
 
   gtk_image_view_set_abstract_image (GTK_IMAGE_VIEW (image_view),
                                      GTK_ABSTRACT_IMAGE (image));
-
-  /*GdkPixbuf *pixbuf;*/
-
-  /*pixbuf = gdk_pixbuf_new_from_file ("/usr/share/backgrounds/gnome/Fabric.jpg",*/
-                                     /*NULL);*/
-
-  /*g_assert (pixbuf != NULL);*/
-  /*gtk_image_view_set_pixbuf (GTK_IMAGE_VIEW (image_view), pixbuf, 0);*/
-
-  /*g_object_unref (G_OBJECT (pixbuf));*/
 }
 
 
 void
 load_hidpi_pixbuf_button_clicked_cb ()
 {
-  GdkPixbuf *pixbuf;
+  GdkPixbufAnimation *animation;
+  GtkPixbufAnimationImage *image;
 
-  /* I really hope you have this. */
-  pixbuf = gdk_pixbuf_new_from_file ("/usr/share/backgrounds/gnome/Fabric.jpg",
-                                     NULL);
+  g_warning ("Reminder: This just loads an animation right now.");
 
-  g_assert (pixbuf != NULL);
-  gtk_image_view_set_pixbuf (GTK_IMAGE_VIEW (image_view), pixbuf, 2);
+  animation = gdk_pixbuf_animation_new_from_file ("/home/baedert/0mKXcg1.gif", NULL);
+  image = gtk_pixbuf_animation_image_new (animation, 1);
 
-  g_object_unref (G_OBJECT (pixbuf));
+  g_message ("%s", g_type_name (G_TYPE_FROM_INSTANCE (image)));
+
+  gtk_image_view_set_abstract_image (GTK_IMAGE_VIEW (image_view), GTK_ABSTRACT_IMAGE (image));
 }
 
 void

@@ -176,7 +176,7 @@ load_hidpi_pixbuf_button_clicked_cb ()
   g_warning ("Reminder: This just loads an animation right now.");
 
   animation = gdk_pixbuf_animation_new_from_file ("/home/baedert/0mKXcg1.gif", NULL);
-  image = gtk_pixbuf_animation_image_new (animation, 1);
+  image = gtk_pixbuf_animation_image_new (animation, 2);
 
   gtk_image_view_set_abstract_image (GTK_IMAGE_VIEW (image_view), GTK_ABSTRACT_IMAGE (image));
 }

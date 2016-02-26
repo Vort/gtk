@@ -578,7 +578,6 @@ gtk_image_view_compute_bounding_box (GtkImageView *image_view,
   double scale;
   double angle;
 
-#if 0
   if (priv->size_valid)
     {
       *width = priv->cached_width;
@@ -588,9 +587,6 @@ gtk_image_view_compute_bounding_box (GtkImageView *image_view,
       return;
     }
 
-#endif
-
-  /*if (!priv->image_surface)*/
   if (!priv->image)
     {
       *width  = 0;
@@ -676,7 +672,6 @@ gtk_image_view_update_adjustments (GtkImageView *image_view)
   if (!priv->hadjustment && !priv->vadjustment)
     return;
 
-  /*if (!priv->image_surface)*/
   if (!priv->image)
     {
       if (priv->hadjustment)
@@ -750,7 +745,6 @@ gesture_zoom_begin_cb (GtkGesture       *gesture,
 
   if (!priv->zoomable ||
       !priv->image)
-      /*!priv->image_surface)*/
     {
       gtk_gesture_set_state (gesture, GTK_EVENT_SEQUENCE_DENIED);
       return;
@@ -843,7 +837,6 @@ gesture_rotate_begin_cb (GtkGesture       *gesture,
   GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (user_data);
 
   if (!priv->rotatable ||
-      /*!priv->image_surface)*/
       !priv->image)
     {
       gtk_gesture_set_state (gesture, GTK_EVENT_SEQUENCE_DENIED);
@@ -1249,7 +1242,6 @@ gtk_image_view_set_scale (GtkImageView *image_view,
   priv->size_valid = FALSE;
   gtk_image_view_update_adjustments (image_view);
 
-  /*if (!priv->image_surface)*/
   if (!priv->image)
     return;
 
@@ -1335,7 +1327,6 @@ gtk_image_view_set_angle (GtkImageView *image_view,
   g_object_notify_by_pspec (G_OBJECT (image_view),
                             widget_props[PROP_ANGLE]);
 
-  /*if (!priv->image_surface)*/
   if (!priv->image)
     return;
 
@@ -1813,7 +1804,6 @@ gtk_image_view_scroll_event (GtkWidget       *widget,
   double new_scale = priv->scale - (0.1 * event->delta_y);
   State state;
 
-  /*if (!priv->image_surface ||*/
   if (!priv->image ||
       !priv->zoomable)
     return GDK_EVENT_PROPAGATE;

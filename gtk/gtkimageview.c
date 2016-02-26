@@ -85,7 +85,6 @@ struct _GtkImageViewPrivate
 {
   double   scale;
   double   angle;
-  int      scale_factor;
 
   gboolean fit_allocation      : 1;
   gboolean scale_set           : 1;

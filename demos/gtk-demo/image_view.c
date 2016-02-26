@@ -155,10 +155,10 @@ void
 load_pixbuf_button_clicked_cb ()
 {
   GdkPixbuf *pixbuf;
-  GtkPixbufImage *image;
+  GtkSurfaceImage *image;
 
   pixbuf = gdk_pixbuf_new_from_file ("/usr/share/backgrounds/gnome/Fabric.jpg", NULL);
-  image = gtk_pixbuf_image_new (pixbuf, 1);
+  image = gtk_surface_image_new_from_pixbuf (pixbuf, 1);
 
   g_object_unref (pixbuf);
 

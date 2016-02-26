@@ -59,7 +59,6 @@
 #define RAD_TO_DEG(x) (((x) / (2.0 * M_PI) * 360.0))
 
 #define TRANSITION_DURATION (150.0 * 1000.0)
-/*#define TRANSITION_DURATION (4500.0 * 1000.0)*/
 #define ANGLE_TRANSITION_MIN_DELTA (1.0)
 #define SCALE_TRANSITION_MIN_DELTA (0.01)
 
@@ -83,6 +82,9 @@ typedef struct
 
 struct _GtkImageViewPrivate
 {
+  GtkAbstractImage *image;
+  GdkWindow *event_window;
+
   double   scale;
   double   angle;
 
@@ -111,17 +113,11 @@ struct _GtkImageViewPrivate
   double      anchor_x;
   double      anchor_y;
 
-
-  GdkWindow *event_window;
-
   /* GtkScrollable stuff */
   GtkAdjustment       *hadjustment;
   GtkAdjustment       *vadjustment;
   GtkScrollablePolicy  hscroll_policy : 1;
   GtkScrollablePolicy  vscroll_policy : 1;
-
-  GtkAbstractImage *image;
-
 
   /* Transitions */
   double transition_start_angle;
@@ -568,8 +564,8 @@ gtk_image_view_compute_bounding_box (GtkImageView *image_view,
   GtkAllocation alloc;
   double image_width;
   double image_height;
-  double bb_width  = 0;
-  double bb_height = 0;
+  double bb_width;
+  double bb_height;
   double upper_right_degrees;
   double upper_left_degrees;
   double r;
@@ -971,7 +967,6 @@ gtk_image_view_init (GtkImageView *image_view)
   GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
   GtkWidget *widget = GTK_WIDGET (image_view);
 
-  gtk_widget_set_can_focus (widget, TRUE);
   gtk_widget_set_has_window (widget, FALSE);
 
   priv->scale = 1.0;
@@ -1150,9 +1145,9 @@ gtk_image_view_set_vadjustment (GtkImageView  *image_view,
   gtk_image_view_update_adjustments (image_view);
 
   if (priv->fit_allocation)
-    gtk_widget_queue_draw ((GtkWidget *)image_view);
+    gtk_widget_queue_draw (GTK_WIDGET (image_view));
   else
-    gtk_widget_queue_resize ((GtkWidget *)image_view);
+    gtk_widget_queue_resize (GTK_WIDGET (image_view));
 }
 
 static void
@@ -2157,7 +2152,7 @@ gtk_image_view_load_image_from_stream (GtkImageView *image_view,
         {
           GdkPixbuf *frame = gdk_pixbuf_animation_get_static_image (result);
 
-          image = GTK_ABSTRACT_IMAGE (gtk_pixbuf_image_new (frame, scale_factor));
+          image = GTK_ABSTRACT_IMAGE (gtk_surface_image_new_from_pixbuf (frame, scale_factor));
           g_object_unref (result);
         }
       else
@@ -2368,13 +2363,13 @@ gtk_image_view_set_pixbuf (GtkImageView    *image_view,
                            const GdkPixbuf *pixbuf,
                            int              scale_factor)
 {
-  GtkPixbufImage *image;
+  GtkSurfaceImage *image;
 
   g_return_if_fail (GTK_IS_IMAGE_VIEW (image_view));
   g_return_if_fail (GDK_IS_PIXBUF (pixbuf));
   g_return_if_fail (scale_factor >= 0);
 
-  image = gtk_pixbuf_image_new (pixbuf, scale_factor);
+  image = gtk_surface_image_new_from_pixbuf (pixbuf, scale_factor);
 
   gtk_image_view_set_abstract_image (image_view, GTK_ABSTRACT_IMAGE (image));
 }

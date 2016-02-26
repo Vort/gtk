@@ -67,37 +67,6 @@ int gtk_abstract_image_get_scale_factor (GtkAbstractImage *image);
 
 /* ------------------------------------------------------------------------------------ */
 
-typedef struct _GtkPixbufImage GtkPixbufImage;
-typedef struct _GtkPixbufImageClass GtkPixbufImageClass;
-
-#define GTK_TYPE_PIXBUF_IMAGE           (gtk_pixbuf_image_get_type ())
-#define GTK_PIXBUF_IMAGE(obj)           (G_TYPE_CHECK_INSTANCE_CAST (obj, GTK_TYPE_PIXBUF_IMAGE, GtkPixbufImage))
-#define GTK_PIXBUF_IMAGE_CLASS(cls)     (G_TYPE_CHECK_CLASS_CAST (cls, GTK_TYPE_PIXBUF_IMAGE, GtkPixbufImageClass))
-#define GTK_IS_PIXBUF_IMAGE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_PIXBUF_IMAGE))
-#define GTK_IS_PIXBUF_IMAGE_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_PIXBUF_IMAGE))
-#define GTK_PIXBUF_IMAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_PIXBUF_IMAGE, GtkPixbufImageClass))
-
-struct _GtkPixbufImage
-{
-  GtkAbstractImage parent;
-  cairo_surface_t *surface;
-  int scale_factor;
-};
-
-struct _GtkPixbufImageClass
-{
-  GtkAbstractImageClass parent_class;
-};
-
-GDK_AVAILABLE_IN_3_20
-GType gtk_pixbuf_image_get_type (void) G_GNUC_CONST;
-
-GDK_AVAILABLE_IN_3_20
-GtkPixbufImage *gtk_pixbuf_image_new (const GdkPixbuf *pixbuf, int scale_factor);
-
-
-/* ------------------------------------------------------------------------------------ */
-
 
 typedef struct _GtkPixbufAnimationImage GtkPixbufAnimationImage;
 typedef struct _GtkPixbufAnimationImageClass GtkPixbufAnimationImageClass;
@@ -160,7 +129,10 @@ struct _GtkSurfaceImageClass
 GDK_AVAILABLE_IN_3_20
 GType gtk_surface_image_get_type (void) G_GNUC_CONST;
 
+GDK_AVAILABLE_IN_3_20
 GtkSurfaceImage *gtk_surface_image_new (cairo_surface_t *surface);
+GDK_AVAILABLE_IN_3_20
+GtkSurfaceImage *gtk_surface_image_new_from_pixbuf (const GdkPixbuf *pixbuf, int scale_factor);
 
 G_END_DECLS
 

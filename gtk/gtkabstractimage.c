@@ -83,62 +83,6 @@ gtk_abstract_image_get_scale_factor (GtkAbstractImage *image)
 
 /* }}} */
 
-/* GtkPixbufImage {{{ */
-G_DEFINE_TYPE (GtkPixbufImage, gtk_pixbuf_image, GTK_TYPE_ABSTRACT_IMAGE)
-
-
-GtkPixbufImage *
-gtk_pixbuf_image_new (const GdkPixbuf *pixbuf, int scale_factor)
-{
-  GtkPixbufImage *image = g_object_new (GTK_TYPE_PIXBUF_IMAGE, NULL);
-  image->scale_factor = scale_factor;
-  image->surface = gdk_cairo_surface_create_from_pixbuf (pixbuf, 1, NULL);
-
-  return image;
-}
-
-static int
-gtk_pixbuf_image_get_width (GtkAbstractImage *image)
-{
-  return cairo_image_surface_get_width (GTK_PIXBUF_IMAGE (image)->surface);
-}
-
-static int
-gtk_pixbuf_image_get_height (GtkAbstractImage *image)
-{
-  return cairo_image_surface_get_height (GTK_PIXBUF_IMAGE (image)->surface);
-}
-
-static int
-gtk_pixbuf_image_get_scale_factor (GtkAbstractImage *image)
-{
-  return GTK_PIXBUF_IMAGE (image)->scale_factor;
-}
-
-static void
-gtk_pixbuf_image_draw (GtkAbstractImage *image, cairo_t *ct)
-{
-  cairo_set_source_surface (ct, GTK_PIXBUF_IMAGE (image)->surface, 0, 0);
-}
-
-
-static void
-gtk_pixbuf_image_init (GtkPixbufImage *image)
-{
-}
-
-static void
-gtk_pixbuf_image_class_init (GtkPixbufImageClass *klass)
-{
-  GtkAbstractImageClass *image_class = GTK_ABSTRACT_IMAGE_CLASS (klass);
-
-  image_class->get_width = gtk_pixbuf_image_get_width;
-  image_class->get_height = gtk_pixbuf_image_get_height;
-  image_class->get_scale_factor = gtk_pixbuf_image_get_scale_factor;
-  image_class->draw = gtk_pixbuf_image_draw;
-}
-/* }}} */
-
 /* GtkPixbufAnimationImage {{{ */
 G_DEFINE_TYPE (GtkPixbufAnimationImage, gtk_pixbuf_animation_image, GTK_TYPE_ABSTRACT_IMAGE)
 
@@ -197,7 +141,7 @@ gtk_pixbuf_animation_image_draw (GtkAbstractImage *_image, cairo_t *ct)
   GtkPixbufAnimationImage *image = GTK_PIXBUF_ANIMATION_IMAGE (_image);
 
   /* We start the animation at the first draw() call... */
-  if (image->timeout_id == 0)
+  if (G_UNLIKELY (image->timeout_id == 0))
     {
       image->timeout_id = g_timeout_add (image->delay_ms, gtk_pixbuf_animation_image_advance, image);
     }
@@ -261,6 +205,15 @@ gtk_surface_image_new (cairo_surface_t *surface)
 {
   GtkSurfaceImage *image = g_object_new (GTK_TYPE_SURFACE_IMAGE, NULL);
   image->surface = surface;
+
+  return image;
+}
+
+GtkSurfaceImage *
+gtk_surface_image_new_from_pixbuf (const GdkPixbuf *pixbuf, int scale_factor)
+{
+  GtkSurfaceImage *image = g_object_new (GTK_TYPE_SURFACE_IMAGE, NULL);
+  image->surface = gdk_cairo_surface_create_from_pixbuf (pixbuf, scale_factor, NULL);
 
   return image;
 }

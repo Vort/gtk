@@ -573,6 +573,7 @@ gtk_image_view_compute_bounding_box (GtkImageView *image_view,
   double upper_left_x, upper_left_y;
   double scale;
   double angle;
+  int scale_factor;
 
   if (priv->size_valid)
     {
@@ -592,11 +593,13 @@ gtk_image_view_compute_bounding_box (GtkImageView *image_view,
 
   gtk_widget_get_allocation (GTK_WIDGET (image_view), &alloc);
   angle = gtk_image_view_get_real_angle (image_view);
+  scale_factor = gtk_abstract_image_get_scale_factor (priv->image);
 
-  image_width = gtk_abstract_image_get_width (priv->image) /
-                gtk_abstract_image_get_scale_factor (priv->image);
-  image_height = gtk_abstract_image_get_height (priv->image) /
-                 gtk_abstract_image_get_scale_factor (priv->image);
+  if (scale_factor == 0)
+    scale_factor = gtk_widget_get_scale_factor (GTK_WIDGET (image_view));
+
+  image_width = gtk_abstract_image_get_width (priv->image) / scale_factor;
+  image_height = gtk_abstract_image_get_height (priv->image) / scale_factor;
 
   upper_right_degrees = DEG_TO_RAD (angle) + atan (image_height / image_width);
   upper_left_degrees  = DEG_TO_RAD (angle) + atan (image_height / -image_width);
@@ -1003,6 +1006,7 @@ gtk_image_view_draw (GtkWidget *widget, cairo_t *ct)
   double draw_width;
   double draw_height;
   double scale = 0.0;
+  int scale_factor;
 
   if (priv->vadjustment && priv->hadjustment)
     {
@@ -1030,10 +1034,12 @@ gtk_image_view_draw (GtkWidget *widget, cairo_t *ct)
   if (draw_width == 0 || draw_height == 0)
     return GDK_EVENT_PROPAGATE;
 
-  image_width = gtk_abstract_image_get_width (priv->image) * scale /
-                gtk_abstract_image_get_scale_factor (priv->image);
-  image_height = gtk_abstract_image_get_height (priv->image) * scale /
-                 gtk_abstract_image_get_scale_factor (priv->image);
+  scale_factor = gtk_abstract_image_get_scale_factor (priv->image);
+  if (scale_factor == 0)
+    scale_factor = gtk_widget_get_scale_factor (widget);
+
+  image_width = gtk_abstract_image_get_width (priv->image) * scale / scale_factor;
+  image_height = gtk_abstract_image_get_height (priv->image) * scale / scale_factor;
 
   if (priv->hadjustment && priv->vadjustment)
     {
@@ -1069,7 +1075,7 @@ gtk_image_view_draw (GtkWidget *widget, cairo_t *ct)
                    - draw_x - (image_width  / 2.0),
                    - draw_y - (image_height / 2.0));
 
-  cairo_scale (ct, scale , scale );
+  cairo_scale (ct, scale, scale);
   cairo_translate (ct, draw_x / scale, draw_y / scale);
   gtk_abstract_image_draw (priv->image, ct);
   cairo_paint (ct);
@@ -2103,8 +2109,6 @@ gtk_image_view_replace_image (GtkImageView     *image_view,
       g_signal_handlers_disconnect_by_func (priv->image, image_changed_cb, image_view);
       g_object_unref (priv->image);
     }
-
-  /* TODO: Handle scale-factor 0 */
 
   if (!image ^ !priv->image ||
       (gtk_abstract_image_get_width (image)  != gtk_abstract_image_get_width (priv->image) ||

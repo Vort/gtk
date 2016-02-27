@@ -83,8 +83,40 @@ gtk_abstract_image_get_scale_factor (GtkAbstractImage *image)
 
 /* }}} */
 
+/* GtkPlayable {{{ */
+G_DEFINE_TYPE (GtkPlayable, gtk_playable, GTK_TYPE_ABSTRACT_IMAGE)
+
+void
+gtk_playable_start (GtkPlayable *p)
+{
+  g_return_if_fail (GTK_IS_PLAYABLE (p));
+
+  GTK_PLAYABLE_GET_CLASS (p)->start (p);
+}
+
+void
+gtk_playable_stop (GtkPlayable *p)
+{
+  g_return_if_fail (GTK_IS_PLAYABLE (p));
+
+  GTK_PLAYABLE_GET_CLASS (p)->stop (p);
+}
+
+static void
+gtk_playable_init (GtkPlayable *p)
+{
+
+}
+
+static void
+gtk_playable_class_init (GtkPlayableClass *p_class)
+{
+
+}
+/* }}} */
+
 /* GtkPixbufAnimationImage {{{ */
-G_DEFINE_TYPE (GtkPixbufAnimationImage, gtk_pixbuf_animation_image, GTK_TYPE_ABSTRACT_IMAGE)
+G_DEFINE_TYPE (GtkPixbufAnimationImage, gtk_pixbuf_animation_image, GTK_TYPE_PLAYABLE)
 
 GtkPixbufAnimationImage *
 gtk_pixbuf_animation_image_new (GdkPixbufAnimation *animation, int scale_factor)
@@ -140,13 +172,24 @@ gtk_pixbuf_animation_image_draw (GtkAbstractImage *_image, cairo_t *ct)
 {
   GtkPixbufAnimationImage *image = GTK_PIXBUF_ANIMATION_IMAGE (_image);
 
-  /* We start the animation at the first draw() call... */
-  if (G_UNLIKELY (image->timeout_id == 0))
-    {
-      image->timeout_id = g_timeout_add (image->delay_ms, gtk_pixbuf_animation_image_advance, image);
-    }
-
   cairo_set_source_surface (ct, image->frame, 0, 0);
+}
+
+static void
+gtk_pixbuf_animation_image_start (GtkPlayable *p)
+{
+  GtkPixbufAnimationImage *image = GTK_PIXBUF_ANIMATION_IMAGE (p);
+
+  image->timeout_id = g_timeout_add (image->delay_ms, gtk_pixbuf_animation_image_advance, image);
+}
+
+static void
+gtk_pixbuf_animation_image_stop (GtkPlayable *p)
+{
+  GtkPixbufAnimationImage *image = GTK_PIXBUF_ANIMATION_IMAGE (p);
+
+  g_source_remove (image->timeout_id);
+  image->timeout_id = 0;
 }
 
 static void
@@ -159,11 +202,15 @@ static void
 gtk_pixbuf_animation_image_class_init (GtkPixbufAnimationImageClass *klass)
 {
   GtkAbstractImageClass *image_class = GTK_ABSTRACT_IMAGE_CLASS (klass);
+  GtkPlayableClass *p_class = GTK_PLAYABLE_CLASS (klass);
 
   image_class->get_width = gtk_pixbuf_animation_image_get_width;
   image_class->get_height = gtk_pixbuf_animation_image_get_height;
   image_class->get_scale_factor = gtk_pixbuf_animation_image_get_scale_factor;
   image_class->draw = gtk_pixbuf_animation_image_draw;
+
+  p_class->start = gtk_pixbuf_animation_image_start;
+  p_class->stop = gtk_pixbuf_animation_image_stop;
 }
 /* }}} */
 

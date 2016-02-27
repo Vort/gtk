@@ -1720,6 +1720,9 @@ gtk_image_view_map (GtkWidget *widget)
   if (priv->event_window)
     gdk_window_show (priv->event_window);
 
+  if (GTK_IS_PLAYABLE (priv->image))
+    gtk_playable_start (GTK_PLAYABLE (priv->image));
+
   GTK_WIDGET_CLASS (gtk_image_view_parent_class)->map (widget);
 }
 
@@ -1730,6 +1733,9 @@ gtk_image_view_unmap (GtkWidget *widget)
 
   if (priv->event_window)
     gdk_window_hide (priv->event_window);
+
+  if (GTK_IS_PLAYABLE (priv->image))
+    gtk_playable_stop (GTK_PLAYABLE (priv->image));
 
   GTK_WIDGET_CLASS (gtk_image_view_parent_class)->unmap (widget);
 }
@@ -2125,6 +2131,9 @@ gtk_image_view_replace_image (GtkImageView     *image_view,
       g_object_ref (priv->image);
       g_signal_connect (priv->image, "changed", G_CALLBACK (image_changed_cb), image_view);
     }
+
+  if (GTK_IS_PLAYABLE (priv->image) && gtk_widget_get_mapped (GTK_WIDGET (image_view)))
+    gtk_playable_start (GTK_PLAYABLE (priv->image));
 
   gtk_image_view_update_adjustments (image_view);
 

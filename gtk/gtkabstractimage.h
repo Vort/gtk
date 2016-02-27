@@ -67,6 +67,42 @@ int gtk_abstract_image_get_scale_factor (GtkAbstractImage *image);
 
 /* ------------------------------------------------------------------------------------ */
 
+typedef struct _GtkPlayable GtkPlayable;
+typedef struct _GtkPlayableClass GtkPlayableClass;
+
+#define GTK_TYPE_PLAYABLE           (gtk_playable_get_type ())
+#define GTK_PLAYABLE(obj)           (G_TYPE_CHECK_INSTANCE_CAST (obj, GTK_TYPE_PLAYABLE, GtkPlayable))
+#define GTK_PLAYABLE_CLASS(cls)     (G_TYPE_CHECK_CLASS_CAST (cls, GTK_TYPE_PLAYABLE, GtkPlayableClass))
+#define GTK_IS_PLAYABLE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_PLAYABLE))
+#define GTK_IS_PLAYABLE_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_PLAYABLE))
+#define GTK_PLAYABLE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_PLAYABLE, GtkPlayableClass))
+
+
+struct _GtkPlayable
+{
+  GtkAbstractImage parent;
+};
+
+
+struct _GtkPlayableClass
+{
+  GtkAbstractImageClass parent_class;
+
+  void (*start) (GtkPlayable *playable);
+  void (*stop)  (GtkPlayable *playable);
+};
+
+GDK_AVAILABLE_IN_3_20
+GType gtk_playable_get_type (void) G_GNUC_CONST;
+
+GDK_AVAILABLE_IN_3_20
+void gtk_playable_start (GtkPlayable *p);
+
+GDK_AVAILABLE_IN_3_20
+void gtk_playable_stop (GtkPlayable *p);
+
+/* ------------------------------------------------------------------------------------ */
+
 
 typedef struct _GtkPixbufAnimationImage GtkPixbufAnimationImage;
 typedef struct _GtkPixbufAnimationImageClass GtkPixbufAnimationImageClass;
@@ -80,7 +116,7 @@ typedef struct _GtkPixbufAnimationImageClass GtkPixbufAnimationImageClass;
 
 struct _GtkPixbufAnimationImage
 {
-  GtkAbstractImage parent;
+  GtkPlayable parent;
   GdkPixbufAnimation *animation;
   GdkPixbufAnimationIter *iter;
   cairo_surface_t *frame;
@@ -91,7 +127,7 @@ struct _GtkPixbufAnimationImage
 
 struct _GtkPixbufAnimationImageClass
 {
-  GtkAbstractImageClass parent_class;
+  GtkPlayableClass parent_class;
 };
 
 GDK_AVAILABLE_IN_3_20

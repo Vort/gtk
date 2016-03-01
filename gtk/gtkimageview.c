@@ -2176,8 +2176,6 @@ gtk_image_view_load_image_from_stream (GtkImageView *image_view,
 
       gtk_image_view_set_abstract_image (image_view, image);
     }
-
-  g_object_unref (input_stream);
 }
 
 static void
@@ -2210,6 +2208,8 @@ gtk_image_view_load_image_contents (GTask        *task,
 
   if (error)
     g_task_return_error (task, error);
+  else
+    g_task_return_boolean (task, TRUE);
 }
 
 static void
@@ -2232,12 +2232,14 @@ gtk_image_view_load_from_input_stream (GTask        *task,
 
   if (error)
     g_task_return_error (task, error);
+  else
+    g_task_return_boolean (task, TRUE);
 }
 
 /**
  * gtk_image_view_load_from_file_async:
  * @image_view: A #GtkImageView instance
- * @file: The file to read from
+ * @file: (transfer full): The file to read from
  * @scale_factor: Scale factor of the image. Pass 0 to use the
  *   scale factor of @image_view
  * @cancellable: (nullable): A #GCancellable that can be used to
@@ -2265,7 +2267,7 @@ gtk_image_view_load_from_file_async (GtkImageView        *image_view,
 
   task_data = g_slice_new (LoadTaskData);
   task_data->scale_factor = scale_factor;
-  task_data->source = file;
+  task_data->source = g_object_ref (file);
 
   task = g_task_new (image_view, cancellable, callback, user_data);
   g_task_set_task_data (task, task_data, (GDestroyNotify)free_load_task_data);
@@ -2327,7 +2329,7 @@ gtk_image_view_load_from_stream_async (GtkImageView        *image_view,
 
   task_data = g_slice_new (LoadTaskData);
   task_data->scale_factor = scale_factor;
-  task_data->source = input_stream;
+  task_data->source = g_object_ref (input_stream);
 
   task = g_task_new (image_view, cancellable, callback, user_data);
   g_task_set_task_data (task, task_data, (GDestroyNotify)free_load_task_data);

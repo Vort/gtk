@@ -252,7 +252,6 @@ gtk_css_animated_style_find_transition (GtkCssAnimatedStyle *style,
 static GSList *
 gtk_css_animated_style_create_css_transitions (GSList              *animations,
                                                GtkCssStyle         *base_style,
-                                               gint64               timestamp,
                                                GtkCssStyle         *source)
 {
   TransitionInfo transitions[GTK_CSS_PROPERTY_N_PROPERTIES] = { { 0, } };
@@ -301,8 +300,8 @@ gtk_css_animated_style_create_css_transitions (GSList              *animations,
       animation = _gtk_css_transition_new (i,
                                            gtk_css_style_get_value (source, i),
                                            _gtk_css_array_value_get_nth (timing_functions, i),
-                                           timestamp + delay * G_USEC_PER_SEC,
-                                           timestamp + (delay + duration) * G_USEC_PER_SEC);
+                                           duration * G_USEC_PER_SEC,
+                                           delay * G_USEC_PER_SEC);
       animations = g_slist_prepend (animations, animation);
     }
 
@@ -436,7 +435,7 @@ gtk_css_animated_style_new (GtkCssStyle             *base_style,
   animations = NULL;
 
   if (previous_style != NULL)
-    animations = gtk_css_animated_style_create_css_transitions (animations, base_style, timestamp, previous_style);
+    animations = gtk_css_animated_style_create_css_transitions (animations, base_style, previous_style);
   animations = gtk_css_animated_style_create_css_animations (animations, base_style, parent_style, timestamp, provider, previous_style);
 
   if (animations == NULL)

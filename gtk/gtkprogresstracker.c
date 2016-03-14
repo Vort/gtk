@@ -18,9 +18,24 @@
  */
 
 #include "gtkprogresstrackerprivate.h"
+#include "gtkprivate.h"
 #include "gtkcsseasevalueprivate.h"
 
 #include <math.h>
+
+static gdouble gtk_slowdown = 1.0;
+
+void
+_gtk_set_slowdown (gdouble factor)
+{
+  gtk_slowdown = factor;
+}
+
+gdouble
+_gtk_get_slowdown (gdouble factor)
+{
+  return gtk_slowdown;
+}
 
 void
 gtk_progress_tracker_start (GtkProgressTracker *tracker,
@@ -62,7 +77,7 @@ gtk_progress_tracker_next_frame (GtkProgressTracker *tracker,
       return;
     }
 
-  delta = (frame_time - tracker->last_frame_time) / (gdouble) tracker->duration;
+  delta = (frame_time - tracker->last_frame_time) / gtk_slowdown / tracker->duration;
   tracker->last_frame_time = frame_time;
   tracker->iteration += delta;
 }

@@ -57,12 +57,16 @@ struct _GtkAbstractImageClass
 GDK_AVAILABLE_IN_3_20
 GType gtk_abstract_image_get_type (void) G_GNUC_CONST;
 
+GDK_AVAILABLE_IN_3_20
 int gtk_abstract_image_get_width (GtkAbstractImage *image);
 
+GDK_AVAILABLE_IN_3_20
 int gtk_abstract_image_get_height (GtkAbstractImage *image);
 
+GDK_AVAILABLE_IN_3_20
 void gtk_abstract_image_draw (GtkAbstractImage *image, cairo_t *ct);
 
+GDK_AVAILABLE_IN_3_20
 int gtk_abstract_image_get_scale_factor (GtkAbstractImage *image);
 
 /* ------------------------------------------------------------------------------------ */

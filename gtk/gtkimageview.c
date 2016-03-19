@@ -2125,6 +2125,9 @@ gtk_image_view_replace_image (GtkImageView     *image_view,
   if (priv->image)
     {
       g_signal_handlers_disconnect_by_func (priv->image, image_changed_cb, image_view);
+      if (GTK_IS_PLAYABLE (priv->image))
+        gtk_playable_stop (GTK_PLAYABLE (priv->image));
+
       g_object_unref (priv->image);
     }
 

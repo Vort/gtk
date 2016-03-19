@@ -2398,6 +2398,7 @@ gtk_image_view_set_pixbuf (GtkImageView    *image_view,
 
   image = gtk_surface_image_new_from_pixbuf (pixbuf, scale_factor);
 
+  /* Will ref the image */
   gtk_image_view_set_abstract_image (image_view, GTK_ABSTRACT_IMAGE (image));
 }
 
@@ -2422,6 +2423,7 @@ gtk_image_view_set_surface (GtkImageView    *image_view,
 
   image = gtk_surface_image_new (surface);
 
+  /* Will ref the image */
   gtk_image_view_replace_image (image_view, GTK_ABSTRACT_IMAGE (image));
 }
 
@@ -2459,5 +2461,6 @@ gtk_image_view_set_abstract_image (GtkImageView     *image_view,
   g_return_if_fail (GTK_IS_IMAGE_VIEW (image_view));
   g_return_if_fail (GTK_IS_ABSTRACT_IMAGE (abstract_image));
 
+  /* Will ref the image */
   gtk_image_view_replace_image (image_view, abstract_image);
 }

@@ -174,39 +174,6 @@ GtkSurfaceImage *gtk_surface_image_new (cairo_surface_t *surface);
 GDK_AVAILABLE_IN_3_20
 GtkSurfaceImage *gtk_surface_image_new_from_pixbuf (const GdkPixbuf *pixbuf, int scale_factor);
 
-/* ------------------------------------------------------------------------------------ */
-
-typedef struct _GtkScalingImage GtkScalingImage;
-typedef struct _GtkScalingImageClass GtkScalingImageClass;
-
-
-#define GTK_TYPE_SCALING_IMAGE           (gtk_scaling_image_get_type ())
-#define GTK_SCALING_IMAGE(obj)           (G_TYPE_CHECK_INSTANCE_CAST (obj, GTK_TYPE_SCALING_IMAGE, GtkScalingImage))
-#define GTK_SCALING_IMAGE_CLASS(cls)     (G_TYPE_CHECK_CLASS_CAST (cls, GTK_TYPE_SCALING_IMAGE, GtkScalingImageClass))
-#define GTK_IS_SCALING_IMAGE(obj)        (G_TYPE_CHECK_INSTANCE_TYPE (obj, GTK_TYPE_SCALING_IMAGE))
-#define GTK_IS_SCALING_IMAGE_CLASS(obj)  (G_TYPE_CHECK_CLASS_TYPE (obj, GTK_TYPE_SCALING_IMAGE))
-#define GTK_SCALING_IMAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GTK_TYPE_SCALING_IMAGE, GtkScalingImageClass))
-
-struct _GtkScalingImage
-{
-  GtkAbstractImage parent;
-};
-
-struct _GtkScalingImageClass
-{
-  GtkAbstractImageClass parent_class;
-
-  void   (*set_scale) (GtkScalingImage *image, double scale);
-};
-
-GDK_AVAILABLE_IN_3_20
-GType gtk_scaling_image_get_type (void) G_GNUC_CONST;
-
-GDK_AVAILABLE_IN_3_20
-void gtk_scaling_image_set_scale (GtkScalingImage *image, double scale);
-
-
-
 G_END_DECLS
 
 #endif

@@ -283,27 +283,3 @@ gtk_surface_image_class_init (GtkSurfaceImageClass *klass)
 }
 
 /* }}} */
-
-/* GtkScalingImage {{{ */
-
-G_DEFINE_TYPE (GtkScalingImage, gtk_scaling_image, GTK_TYPE_ABSTRACT_IMAGE)
-
-static void
-gtk_scaling_image_init (GtkScalingImage *image)
-{
-
-}
-
-static void
-gtk_scaling_image_class_init (GtkScalingImageClass *image)
-{
-
-}
-
-void
-gtk_scaling_image_set_scale (GtkScalingImage *image, double scale)
-{
-  GTK_SCALING_IMAGE_GET_CLASS (image)->set_scale (image, scale);
-}
-
-/* }}} */

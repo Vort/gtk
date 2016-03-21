@@ -2695,7 +2695,7 @@ gtk_range_multipress_gesture_pressed (GtkGestureMultiPress *gesture,
                 NULL);
 
   if (priv->mouse_location == MOUSE_SLIDER &&
-      gdk_event_triggers_context_menu ((GdkEvent *)event))
+      gdk_event_triggers_context_menu (event))
     {
       gboolean handled;
 

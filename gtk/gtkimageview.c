@@ -466,8 +466,8 @@ gtk_image_view_fix_anchor (GtkImageView *image_view,
   double hupper_delta_angle, vupper_delta_angle;
   double cur_scale = gtk_image_view_get_real_scale (image_view);
 
-  g_assert (old_state->hupper > 0);
-  g_assert (old_state->vupper > 0);
+  g_assert (old_state->hupper >= 0);
+  g_assert (old_state->vupper >= 0);
   g_assert (priv->hadjustment);
   g_assert (priv->vadjustment);
   g_assert (priv->size_valid);
@@ -1025,8 +1025,11 @@ gtk_image_view_draw (GtkWidget *widget, cairo_t *ct)
       int w = gtk_adjustment_get_upper (priv->hadjustment);
       int h = gtk_adjustment_get_upper (priv->vadjustment);
 
-      gtk_render_background (sc, ct, x, y, w, h);
-      gtk_render_frame (sc, ct, x, y, w, h);
+      if (w > 0 && h > 0)
+        {
+          gtk_render_background (sc, ct, x, y, w, h);
+          gtk_render_frame (sc, ct, x, y, w, h);
+        }
     }
   else
     {
@@ -1820,7 +1823,7 @@ gtk_image_view_scroll_event (GtkWidget       *widget,
 {
   GtkImageView *image_view = GTK_IMAGE_VIEW (widget);
   GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
-  double new_scale = priv->scale - (0.1 * event->delta_y);
+  double new_scale = MAX (0, priv->scale - (0.1 * event->delta_y));
   State state;
 
   if (!priv->image ||

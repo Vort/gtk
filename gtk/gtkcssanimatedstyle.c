@@ -396,7 +396,7 @@ gtk_css_animated_style_create_css_animations (GSList                  *animation
 /* PUBLIC API */
 
 static void
-gtk_css_animated_style_apply_animations (GtkCssAnimatedStyle *style,
+gtk_css_animated_style_advance_animations (GtkCssAnimatedStyle *style,
                                          gint64               timestamp)
 {
   GSList *l;
@@ -444,7 +444,7 @@ gtk_css_animated_style_new (GtkCssStyle             *base_style,
   result->current_time = timestamp;
   result->animations = animations;
 
-  gtk_css_animated_style_apply_animations (result, timestamp);
+  gtk_css_animated_style_advance_animations (result, timestamp);
 
   return GTK_CSS_STYLE (result);
 }
@@ -486,7 +486,7 @@ gtk_css_animated_style_new_advance (GtkCssAnimatedStyle *source,
   result->current_time = timestamp;
   result->animations = animations;
 
-  gtk_css_animated_style_apply_animations (result, timestamp);
+  gtk_css_animated_style_advance_animations (result, timestamp);
 
   return GTK_CSS_STYLE (result);
 }

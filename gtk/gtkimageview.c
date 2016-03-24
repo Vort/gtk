@@ -700,14 +700,14 @@ gtk_image_view_update_adjustments (GtkImageView *image_view)
    * the widget allocation if fit-allocation is set */
   if (priv->hadjustment)
     {
-      gtk_adjustment_set_upper (priv->hadjustment, width);
+      gtk_adjustment_set_upper (priv->hadjustment, MAX (width,  widget_width));
       gtk_adjustment_set_page_size (priv->hadjustment, widget_width);
       gtk_image_view_restrict_adjustment (priv->hadjustment);
     }
 
   if (priv->vadjustment)
     {
-      gtk_adjustment_set_upper (priv->vadjustment, height);
+      gtk_adjustment_set_upper (priv->vadjustment, MAX (height, widget_height));
       gtk_adjustment_set_page_size (priv->vadjustment, widget_height);
       gtk_image_view_restrict_adjustment (priv->vadjustment);
     }

@@ -330,7 +330,6 @@ static GSList *
 gtk_css_animated_style_create_css_animations (GSList                  *animations,
                                               GtkCssStyle             *base_style,
                                               GtkCssStyle             *parent_style,
-                                              gint64                   timestamp,
                                               GtkStyleProviderPrivate *provider,
                                               GtkCssStyle             *source)
 {
@@ -367,7 +366,6 @@ gtk_css_animated_style_create_css_animations (GSList                  *animation
       if (animation)
         {
           animation = _gtk_css_animation_copy (GTK_CSS_ANIMATION (animation),
-                                               timestamp,
                                                _gtk_css_play_state_value_get (_gtk_css_array_value_get_nth (play_states, i)));
         }
       else
@@ -380,7 +378,6 @@ gtk_css_animated_style_create_css_animations (GSList                  *animation
 
           animation = _gtk_css_animation_new (name,
                                               keyframes,
-                                              timestamp,
                                               _gtk_css_number_value_get (_gtk_css_array_value_get_nth (delays, i), 100) * G_USEC_PER_SEC,
                                               _gtk_css_number_value_get (_gtk_css_array_value_get_nth (durations, i), 100) * G_USEC_PER_SEC,
                                               _gtk_css_array_value_get_nth (timing_functions, i),
@@ -436,7 +433,7 @@ gtk_css_animated_style_new (GtkCssStyle             *base_style,
 
   if (previous_style != NULL)
     animations = gtk_css_animated_style_create_css_transitions (animations, base_style, previous_style);
-  animations = gtk_css_animated_style_create_css_animations (animations, base_style, parent_style, timestamp, provider, previous_style);
+  animations = gtk_css_animated_style_create_css_animations (animations, base_style, parent_style, provider, previous_style);
 
   if (animations == NULL)
     return g_object_ref (base_style);

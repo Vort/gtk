@@ -45,14 +45,14 @@ struct _GtkStyleAnimationClass
 
   gboolean      (* is_finished)                         (GtkStyleAnimation      *animation);
   gboolean      (* is_static)                           (GtkStyleAnimation      *animation);
-  void          (* set_values)                          (GtkStyleAnimation      *animation,
+  void          (* advance_values)                      (GtkStyleAnimation      *animation,
                                                          gint64                  for_time_us,
                                                          GtkCssAnimatedStyle    *style);
 };
 
 GType           _gtk_style_animation_get_type           (void) G_GNUC_CONST;
 
-void            _gtk_style_animation_set_values         (GtkStyleAnimation      *animation,
+void            _gtk_style_animation_advance_values     (GtkStyleAnimation      *animation,
                                                          gint64                  for_time_us,
                                                          GtkCssAnimatedStyle    *style);
 gboolean        _gtk_style_animation_is_finished        (GtkStyleAnimation      *animation);

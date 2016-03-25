@@ -77,9 +77,9 @@ gtk_css_animation_get_ease (GtkCssAnimation *animation)
 }
 
 static void
-gtk_css_animation_set_values (GtkStyleAnimation    *style_animation,
-                              gint64                for_time_us,
-                              GtkCssAnimatedStyle  *style)
+gtk_css_animation_advance_values (GtkStyleAnimation    *style_animation,
+                                  gint64                for_time_us,
+                                  GtkCssAnimatedStyle  *style)
 {
   GtkCssAnimation *animation = GTK_CSS_ANIMATION (style_animation);
   double ease;
@@ -149,7 +149,7 @@ _gtk_css_animation_class_init (GtkCssAnimationClass *klass)
 
   object_class->finalize = gtk_css_animation_finalize;
 
-  animation_class->set_values = gtk_css_animation_set_values;
+  animation_class->advance_values = gtk_css_animation_advance_values;
   animation_class->is_finished = gtk_css_animation_is_finished;
   animation_class->is_static = gtk_css_animation_is_static;
 }

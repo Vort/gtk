@@ -27,9 +27,9 @@
 G_DEFINE_TYPE (GtkCssTransition, _gtk_css_transition, GTK_TYPE_STYLE_ANIMATION)
 
 static void
-gtk_css_transition_set_values (GtkStyleAnimation   *animation,
-                               gint64               for_time_us,
-                               GtkCssAnimatedStyle *style)
+gtk_css_transition_advance_values (GtkStyleAnimation   *animation,
+                                   gint64               for_time_us,
+                                   GtkCssAnimatedStyle *style)
 {
   GtkCssTransition *transition = GTK_CSS_TRANSITION (animation);
   GtkCssValue *value, *end;
@@ -91,7 +91,7 @@ _gtk_css_transition_class_init (GtkCssTransitionClass *klass)
 
   object_class->finalize = gtk_css_transition_finalize;
 
-  animation_class->set_values = gtk_css_transition_set_values;
+  animation_class->advance_values = gtk_css_transition_advance_values;
   animation_class->is_finished = gtk_css_transition_is_finished;
   animation_class->is_static = gtk_css_transition_is_static;
 }

@@ -24,9 +24,9 @@
 G_DEFINE_ABSTRACT_TYPE (GtkStyleAnimation, _gtk_style_animation, G_TYPE_OBJECT)
 
 static void
-gtk_style_animation_real_set_values (GtkStyleAnimation    *animation,
-                                     gint64                for_time_us,
-                                     GtkCssAnimatedStyle  *style)
+gtk_style_animation_real_advance_values (GtkStyleAnimation    *animation,
+                                         gint64                for_time_us,
+                                         GtkCssAnimatedStyle  *style)
 {
 }
 
@@ -45,7 +45,7 @@ gtk_style_animation_real_is_static (GtkStyleAnimation *animation)
 static void
 _gtk_style_animation_class_init (GtkStyleAnimationClass *klass)
 {
-  klass->set_values = gtk_style_animation_real_set_values;
+  klass->advance_values = gtk_style_animation_real_advance_values;
   klass->is_finished = gtk_style_animation_real_is_finished;
   klass->is_static = gtk_style_animation_real_is_static;
 }
@@ -56,9 +56,9 @@ _gtk_style_animation_init (GtkStyleAnimation *animation)
 }
 
 void
-_gtk_style_animation_set_values (GtkStyleAnimation    *animation,
-                                 gint64                for_time_us,
-                                 GtkCssAnimatedStyle  *style)
+_gtk_style_animation_advance_values (GtkStyleAnimation    *animation,
+                                     gint64                for_time_us,
+                                     GtkCssAnimatedStyle  *style)
 {
   GtkStyleAnimationClass *klass;
 
@@ -67,7 +67,7 @@ _gtk_style_animation_set_values (GtkStyleAnimation    *animation,
 
   klass = GTK_STYLE_ANIMATION_GET_CLASS (animation);
 
-  klass->set_values (animation, for_time_us, style);
+  klass->advance_values (animation, for_time_us, style);
 }
 
 gboolean

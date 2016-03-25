@@ -405,9 +405,9 @@ gtk_css_animated_style_advance_animations (GtkCssAnimatedStyle *style,
     {
       GtkStyleAnimation *animation = l->data;
       
-      _gtk_style_animation_set_values (animation,
-                                       timestamp,
-                                       GTK_CSS_ANIMATED_STYLE (style));
+      _gtk_style_animation_advance_values (animation,
+                                           timestamp,
+                                           GTK_CSS_ANIMATED_STYLE (style));
     }
 }
 

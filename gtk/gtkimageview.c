@@ -554,14 +554,6 @@ gtk_image_view_fix_anchor (GtkImageView *image_view,
   gtk_widget_queue_draw (GTK_WIDGET (image_view));
 }
 
-static inline void
-set_scale (GtkImageView *image_view, double scale)
-{
-  GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
-
-  priv->scale = scale;
-}
-
 static void
 gtk_image_view_compute_bounding_box (GtkImageView *image_view,
                                      double       *width,
@@ -641,8 +633,7 @@ gtk_image_view_compute_bounding_box (GtkImageView *image_view,
   if (priv->fit_allocation)
     {
       g_assert (!priv->scale_set);
-      set_scale (image_view, scale);
-      /*priv->scale = scale;*/
+      priv->scale = scale;
       g_object_notify_by_pspec (G_OBJECT (image_view),
                                 widget_props[PROP_SCALE]);
     }
@@ -720,8 +711,7 @@ gtk_image_view_set_scale_internal (GtkImageView *image_view,
   GtkImageViewPrivate *priv = gtk_image_view_get_instance_private (image_view);
   scale = MAX (0, scale);
 
-  /*priv->scale = scale;*/
-  set_scale (image_view, scale);
+  priv->scale = scale;
   priv->size_valid = FALSE;
   g_object_notify_by_pspec (G_OBJECT (image_view),
                             widget_props[PROP_SCALE]);
@@ -1150,8 +1140,8 @@ gtk_image_view_set_vadjustment (GtkImageView  *image_view,
 
   if (vadjustment)
     {
-      g_signal_connect ((GObject *)vadjustment, "value-changed",
-                        (GCallback) adjustment_value_changed_cb, image_view);
+      g_signal_connect (G_OBJECT (vadjustment), "value-changed",
+                        G_CALLBACK (adjustment_value_changed_cb), image_view);
       priv->vadjustment = g_object_ref_sink (vadjustment);
     }
   else
@@ -1235,8 +1225,7 @@ gtk_image_view_set_scale (GtkImageView *image_view,
   if (gtk_image_view_transitions_enabled (image_view))
     gtk_image_view_animate_to_scale (image_view);
 
-  /*priv->scale = scale;*/
-  set_scale (image_view, scale);
+  priv->scale = scale;
   g_object_notify_by_pspec (G_OBJECT (image_view),
                             widget_props[PROP_SCALE]);
 
@@ -1472,8 +1461,7 @@ gtk_image_view_set_fit_allocation (GtkImageView *image_view,
 
   if (!priv->fit_allocation)
     {
-      /*priv->scale = 1.0;*/
-      set_scale (image_view, 1.0);
+      priv->scale = 1.0;
       g_object_notify_by_pspec (G_OBJECT (image_view),
                                 widget_props[PROP_SCALE]);
     }

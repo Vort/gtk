@@ -43,10 +43,8 @@ struct _GtkStyleAnimationClass
 {
   GObjectClass parent_class;
 
-  gboolean      (* is_finished)                         (GtkStyleAnimation      *animation,
-                                                         gint64                  at_time_us);
-  gboolean      (* is_static)                           (GtkStyleAnimation      *animation,
-                                                         gint64                  at_time_us);
+  gboolean      (* is_finished)                         (GtkStyleAnimation      *animation);
+  gboolean      (* is_static)                           (GtkStyleAnimation      *animation);
   void          (* set_values)                          (GtkStyleAnimation      *animation,
                                                          gint64                  for_time_us,
                                                          GtkCssAnimatedStyle    *style);
@@ -57,10 +55,8 @@ GType           _gtk_style_animation_get_type           (void) G_GNUC_CONST;
 void            _gtk_style_animation_set_values         (GtkStyleAnimation      *animation,
                                                          gint64                  for_time_us,
                                                          GtkCssAnimatedStyle    *style);
-gboolean        _gtk_style_animation_is_finished        (GtkStyleAnimation      *animation,
-                                                         gint64                  at_time_us);
-gboolean        _gtk_style_animation_is_static          (GtkStyleAnimation      *animation,
-                                                         gint64                  at_time_us);
+gboolean        _gtk_style_animation_is_finished        (GtkStyleAnimation      *animation);
+gboolean        _gtk_style_animation_is_static          (GtkStyleAnimation      *animation);
 
 
 G_END_DECLS

@@ -71,7 +71,7 @@ gtk_css_animated_style_is_static (GtkCssStyle *style)
 
   for (list = animated->animations; list; list = list->next)
     {
-      if (!_gtk_style_animation_is_static (list->data, animated->current_time))
+      if (!_gtk_style_animation_is_static (list->data))
         return FALSE;
     }
 
@@ -470,7 +470,7 @@ gtk_css_animated_style_new_advance (GtkCssAnimatedStyle *source,
     {
       GtkStyleAnimation *animation = l->data;
       
-      if (_gtk_style_animation_is_finished (animation, timestamp))
+      if (_gtk_style_animation_is_finished (animation))
         continue;
 
       animations = g_slist_prepend (animations, g_object_ref (animation));

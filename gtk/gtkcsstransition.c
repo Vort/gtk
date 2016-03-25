@@ -57,8 +57,7 @@ gtk_css_transition_set_values (GtkStyleAnimation   *animation,
 }
 
 static gboolean
-gtk_css_transition_is_finished (GtkStyleAnimation *animation,
-                                gint64             at_time_us)
+gtk_css_transition_is_finished (GtkStyleAnimation *animation)
 {
   GtkCssTransition *transition = GTK_CSS_TRANSITION (animation);
 
@@ -66,8 +65,7 @@ gtk_css_transition_is_finished (GtkStyleAnimation *animation,
 }
 
 static gboolean
-gtk_css_transition_is_static (GtkStyleAnimation *animation,
-                              gint64             at_time_us)
+gtk_css_transition_is_static (GtkStyleAnimation *animation)
 {
   GtkCssTransition *transition = GTK_CSS_TRANSITION (animation);
 

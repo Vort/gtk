@@ -110,15 +110,13 @@ gtk_css_animation_set_values (GtkStyleAnimation    *style_animation,
 }
 
 static gboolean
-gtk_css_animation_is_finished (GtkStyleAnimation *style_animation,
-                               gint64             at_time_us)
+gtk_css_animation_is_finished (GtkStyleAnimation *style_animation)
 {
   return FALSE;
 }
 
 static gboolean
-gtk_css_animation_is_static (GtkStyleAnimation *style_animation,
-                             gint64             at_time_us)
+gtk_css_animation_is_static (GtkStyleAnimation *style_animation)
 {
   GtkCssAnimation *animation = GTK_CSS_ANIMATION (style_animation);
   double iteration;

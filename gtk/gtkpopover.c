@@ -86,6 +86,7 @@
  */
 
 #include "config.h"
+#include <math.h>
 #include <gdk/gdk.h>
 #include "gtkpopover.h"
 #include "gtkpopoverprivate.h"
@@ -110,6 +111,8 @@
 #include "gtkmenusectionbox.h"
 #include "gtkroundedboxprivate.h"
 #include "gtkstylecontextprivate.h"
+#include "gtkcssarrayvalueprivate.h"
+#include "gtkcssenumvalueprivate.h"
 
 #ifdef GDK_WINDOWING_WAYLAND
 #include "wayland/gdkwayland.h"
@@ -177,8 +180,8 @@ struct _GtkPopoverPrivate
   gint transition_diff;
   guint tick_id;
 
-  gint tip_x;
-  gint tip_y;
+  gdouble tip_x;
+  gdouble tip_y;
 };
 
 static GParamSpec *properties[NUM_PROPERTIES];
@@ -677,12 +680,12 @@ get_margin (GtkWidget *widget,
 
 static void
 gtk_popover_get_gap_coords (GtkPopover      *popover,
-                            gint            *initial_x_out,
-                            gint            *initial_y_out,
-                            gint            *tip_x_out,
-                            gint            *tip_y_out,
-                            gint            *final_x_out,
-                            gint            *final_y_out,
+                            gdouble         *initial_x_out,
+                            gdouble         *initial_y_out,
+                            gdouble         *tip_x_out,
+                            gdouble         *tip_y_out,
+                            gdouble         *final_x_out,
+                            gdouble         *final_y_out,
                             GtkPositionType *gap_side_out)
 {
   GtkWidget *widget = GTK_WIDGET (popover);
@@ -857,9 +860,9 @@ static void
 gtk_popover_apply_tail_path (GtkPopover *popover,
                              cairo_t    *cr)
 {
-  gint initial_x, initial_y;
-  gint tip_x, tip_y;
-  gint final_x, final_y;
+  gdouble initial_x, initial_y;
+  gdouble tip_x, tip_y;
+  gdouble final_x, final_y;
 
   if (!popover->priv->widget)
     return;
@@ -874,6 +877,121 @@ gtk_popover_apply_tail_path (GtkPopover *popover,
   cairo_move_to (cr, initial_x, initial_y);
   cairo_line_to (cr, tip_x, tip_y);
   cairo_line_to (cr, final_x, final_y);
+}
+
+static void
+gtk_popover_apply_tail_path_2 (GtkPopover *popover,
+                               cairo_t    *cr,
+                               gint        stroke_width,
+                               gint        mode)
+{
+  GtkPositionType gap_side;
+  gdouble initial_x, initial_y;
+  gdouble tip_x, tip_y;
+  gdouble final_x, final_y;
+  gdouble offset, delta_x, delta_y;
+  gdouble initial_x_m, initial_y_m;
+  gdouble final_x_m, final_y_m;
+  gdouble x, y;
+
+  if (!popover->priv->widget)
+    return;
+
+  gtk_popover_get_gap_coords (popover,
+                              &initial_x, &initial_y,
+                              &tip_x, &tip_y,
+                              &final_x, &final_y,
+                              &gap_side);
+
+  delta_x = fabs (tip_x - initial_x);
+  delta_y = fabs (tip_y - initial_y);
+  if (POS_IS_VERTICAL (gap_side))
+    {
+      offset = delta_x * stroke_width / delta_y;
+      initial_x_m = initial_x + offset;
+      final_x_m = final_x - offset;
+      if (gap_side == GTK_POS_BOTTOM)
+        {
+          initial_y_m = initial_y + stroke_width;
+          final_y_m = final_y + stroke_width;
+        }
+      else
+        {
+          initial_y_m = initial_y - stroke_width;
+          final_y_m = final_y - stroke_width;
+        }
+    }
+  else
+    {
+      offset = delta_y * stroke_width / delta_x;
+      initial_y_m = initial_y + offset;
+      final_y_m = final_y - offset;
+      if (gap_side == GTK_POS_RIGHT)
+        {
+          initial_x_m = initial_x + stroke_width;
+          final_x_m = final_x + stroke_width;
+        }
+      else
+        {
+          initial_x_m = initial_x - stroke_width;
+          final_x_m = final_x - stroke_width;
+        }
+    }
+
+  if (mode)
+    {
+      if (POS_IS_VERTICAL (gap_side))
+        {
+          x = initial_x + stroke_width;
+          if (gap_side == GTK_POS_BOTTOM)
+            y = initial_y + stroke_width;
+          else
+            y = initial_y - stroke_width;
+          cairo_move_to (cr, x, initial_y);
+          cairo_line_to (cr, x, y);
+        }
+      else
+        {
+          y = initial_y + stroke_width;
+          if (gap_side == GTK_POS_RIGHT)
+            x = initial_x + stroke_width;
+          else
+            x = initial_x - stroke_width;
+          cairo_move_to (cr, initial_x, y);
+          cairo_line_to (cr, x, y);
+        }
+
+      cairo_line_to (cr, initial_x_m, initial_y_m);
+      cairo_line_to (cr, tip_x, tip_y);
+      cairo_line_to (cr, final_x_m, final_y_m);
+
+      if (POS_IS_VERTICAL(gap_side))
+        {
+          x = final_x - stroke_width;
+          if (gap_side == GTK_POS_BOTTOM)
+            y = final_y + stroke_width;
+          else
+            y = final_y - stroke_width;
+          cairo_line_to (cr, x, y);
+          cairo_line_to (cr, x, final_y);
+        }
+      else
+        {
+          y = final_y - stroke_width;
+          if (gap_side == GTK_POS_RIGHT)
+            x = final_x + stroke_width;
+          else
+            x = final_x - stroke_width;
+          cairo_line_to (cr, x, y);
+          cairo_line_to (cr, final_x, y);
+       }
+    }
+  else
+    {
+      cairo_move_to (cr, initial_x_m, initial_y_m);
+      cairo_line_to (cr, tip_x, tip_y);
+      cairo_line_to (cr, final_x_m, final_y_m);
+    }
 }
 
 static void
@@ -1076,6 +1194,126 @@ gtk_popover_update_position (GtkPopover *popover)
   _gtk_popover_update_child_visible (popover);
 }
 
+static void
+gtk_popover_fill_tail (cairo_t         *cr,
+                       GtkPopover      *popover,
+                       GtkAllocation   *allocation,
+                       GtkStyleContext *context,
+                       gint             stroke_width)
+{
+  GtkPositionType gap_side;
+  gdouble initial_x, initial_y;
+  gdouble tip_x, tip_y;
+  gdouble final_x, final_y;
+  gdouble v1_x, v1_y, v2_x, v2_y;
+  gdouble angle, offset1, offset2;
+
+  GtkCssArea background_clip = _gtk_css_area_value_get(
+    _gtk_css_array_value_get_nth(
+      gtk_css_style_get_value(
+        gtk_style_context_lookup_style(context),
+        GTK_CSS_PROPERTY_BACKGROUND_CLIP
+        ),
+      0));
+
+  gtk_popover_get_gap_coords (popover,
+                              &initial_x, &initial_y,
+                              &tip_x, &tip_y,
+                              &final_x, &final_y,
+                              &gap_side);
+
+  v1_x = final_x - initial_x;
+  v1_y = final_y - initial_y;
+  v2_x = tip_x - initial_x;
+  v2_y = tip_y - initial_y;
+  angle = fabs (atan2 (v1_x * v2_y - v1_y * v2_x, v1_x * v2_x + v1_y * v2_y));
+  offset1 = stroke_width / sin (angle);
+  offset2 = stroke_width / cos (angle);
+
+  cairo_save (cr);
+  if (background_clip == GTK_CSS_AREA_BORDER_BOX)
+    {
+      gtk_popover_apply_tail_path_2 (popover, cr, stroke_width, 0);
+      cairo_clip (cr);
+    }
+  else
+    {
+      if (gap_side == GTK_POS_BOTTOM)
+        {
+          initial_x += offset1;
+          final_x -= offset1;
+          tip_y -= offset2;
+        }
+      else if (gap_side == GTK_POS_TOP)
+        {
+          initial_x += offset1;
+          final_x -= offset1;
+          tip_y += offset2;
+        }
+      else if (gap_side == GTK_POS_RIGHT)
+        {
+          initial_y += offset1;
+          final_y -= offset1;
+          tip_x -= offset2;
+        }
+      else if (gap_side == GTK_POS_LEFT)
+        {
+          initial_y += offset1;
+          final_y -= offset1;
+          tip_x += offset2;
+        }
+
+      cairo_move_to (cr, initial_x, initial_y);
+      cairo_line_to (cr, tip_x, tip_y);
+      cairo_line_to (cr, final_x, final_y);
+      cairo_clip (cr);
+    }
+
+  gtk_render_background (context, cr,
+                         0, 0,
+                         allocation->width, allocation->height);
+
+  cairo_restore (cr);
+}
+
+static void
+gtk_popover_stroke_tail (cairo_t    *cr,
+                         GtkPopover *popover,
+                         GdkRGBA     border_color,
+                         gint        stroke_width)
+{
+  cairo_save (cr);
+
+  gtk_popover_apply_tail_path_2 (popover, cr, stroke_width, 1);
+  cairo_clip (cr);
+
+  gtk_popover_apply_tail_path (popover, cr);
+  gdk_cairo_set_source_rgba (cr, &border_color);
+
+  cairo_set_line_width (cr, stroke_width * 2);
+  cairo_stroke (cr);
+
+  cairo_restore (cr);
+}
+
+static void
+gtk_popover_apply_inverse_mask (cairo_t       *cr,
+                                GtkPopover    *popover,
+                                GtkAllocation *allocation,
+                                gint           stroke_width,
+                                gint           mode)
+{
+  if (!popover->priv->widget)
+    return;
+  cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);
+  cairo_rectangle (cr,
+                   allocation->x, allocation->y,
+                   allocation->width, allocation->height);
+  gtk_popover_apply_tail_path_2 (popover, cr, stroke_width, mode);
+  cairo_clip (cr);
+  cairo_set_fill_rule (cr, CAIRO_FILL_RULE_WINDING);
+}
+
 static gboolean
 gtk_popover_draw (GtkWidget *widget,
                   cairo_t   *cr)
@@ -1087,9 +1325,6 @@ gtk_popover_draw (GtkWidget *widget,
   GtkBorder border;
   GdkRGBA border_color;
   gint rect_x1, rect_x2, rect_y1, rect_y2;
-  gint initial_x, initial_y, final_x, final_y;
-  gint gap_start, gap_end;
-  GtkPositionType gap_side;
   GtkStateFlags state;
 
   context = gtk_widget_get_style_context (widget);
@@ -1103,71 +1338,38 @@ gtk_popover_draw (GtkWidget *widget,
                                &rect_x2, &rect_y2);
 
   /* Render the rect background */
+  cairo_save (cr);
+  gtk_popover_apply_inverse_mask (cr, popover, &allocation, border.bottom, 0);
   gtk_render_background (context, cr,
                          rect_x1, rect_y1,
                          rect_x2 - rect_x1,
                          rect_y2 - rect_y1);
+  cairo_restore (cr);
+
+
+  /* Render the frame, without the gap for the arrow tip */
+  cairo_save (cr);
+  gtk_popover_apply_inverse_mask (cr, popover, &allocation, border.bottom, 1);
+  gtk_render_frame (context, cr,
+                    rect_x1, rect_y1,
+                    rect_x2 - rect_x1, rect_y2 - rect_y1);
+  cairo_restore (cr);
 
   if (popover->priv->widget)
     {
-      gtk_popover_get_gap_coords (popover,
-                                  &initial_x, &initial_y,
-                                  NULL, NULL,
-                                  &final_x, &final_y,
-                                  &gap_side);
+      /* Render the arrow background */
+      gtk_popover_fill_tail (cr, popover, &allocation, context, border.bottom);
 
-      if (POS_IS_VERTICAL (gap_side))
+      /* Render the border of the arrow tip */
+      if (border.bottom > 0)
         {
-          gap_start = initial_x - rect_x1;
-          gap_end = final_x - rect_x1;
-        }
-      else
-        {
-          gap_start = initial_y - rect_y1;
-          gap_end = final_y - rect_y1;
-        }
-
-      /* Now render the frame, without the gap for the arrow tip */
-      gtk_render_frame_gap (context, cr,
-                            rect_x1, rect_y1,
-                            rect_x2 - rect_x1, rect_y2 - rect_y1,
-                            gap_side,
-                            gap_start, gap_end);
-    }
-  else
-    {
-      gtk_render_frame (context, cr,
-                        rect_x1, rect_y1,
-                        rect_x2 - rect_x1, rect_y2 - rect_y1);
-    }
-
-  /* Clip to the arrow shape */
-  cairo_save (cr);
-
-  gtk_popover_apply_tail_path (popover, cr);
-  cairo_clip (cr);
-
-  /* Render the arrow background */
-  gtk_render_background (context, cr,
-                         0, 0,
-                         allocation.width, allocation.height);
-
-  /* Render the border of the arrow tip */
-  if (border.bottom > 0)
-    {
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-      gtk_style_context_get_border_color (context, state, &border_color);
+          gtk_style_context_get_border_color (context, state, &border_color);
 G_GNUC_END_IGNORE_DEPRECATIONS
 
-      gtk_popover_apply_tail_path (popover, cr);
-      gdk_cairo_set_source_rgba (cr, &border_color);
-
-      cairo_set_line_width (cr, border.bottom + 1);
-      cairo_stroke (cr);
+          gtk_popover_stroke_tail (cr, popover, border_color, border.bottom);
+        }
     }
-
-  /* We're done */
-  cairo_restore (cr);
 
   child = gtk_bin_get_child (GTK_BIN (widget));
 
@@ -1398,7 +1600,7 @@ gtk_popover_check_invalidate_borders (GtkPopover *popover)
 {
   GtkPopoverPrivate *priv = popover->priv;
   GtkPositionType gap_side;
-  gint tip_x, tip_y;
+  gdouble tip_x, tip_y;
 
   if (!priv->widget)
     return;
@@ -1467,7 +1669,7 @@ gtk_popover_button_press (GtkWidget      *widget,
 
 static gboolean
 gtk_popover_button_release (GtkWidget      *widget,
-			    GdkEventButton *event)
+                            GdkEventButton *event)
 {
   GtkPopover *popover = GTK_POPOVER (widget);
   GtkWidget *child, *event_widget;
